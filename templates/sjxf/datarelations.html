@@ -1,0 +1,188 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+数据下发基础表
+{% endblock %}
+
+{% block custom_css %}
+<link href="{% static 'css/plugins/dataTables/datatables.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+{#{% block content-header %}#}
+{#<div class="row wrapper border-bottom white-bg page-heading">#}
+{#    <div class="col-lg-12">#}
+{#        <h2>数据下发</h2>#}
+{#        <ol class="breadcrumb">#}
+{#            <li class="breadcrumb-item">#}
+{#                <a href="#">首页</a>#}
+{#            </li>#}
+{#            <li class="breadcrumb-item active">#}
+{#                <strong>已下发基础表</strong>#}
+{#            </li>#}
+{#        </ol>#}
+{#    </div>#}
+{#    <div class="col-lg-2">#}
+{#    </div>#}
+{#</div>#}
+{#{% endblock %}#}
+
+{% block content %}
+<div class="wrapper wrapper-content animated fadeInRight">
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="ibox">
+                <div class="ibox-title">
+                    <h5>下发数据关系表</h5>
+                </div>
+                <div class="ibox-content">
+                    <div class="row col-sm-12">
+                        <input type="text" class="form-control input-sm m-b-xs col-sm-2" style="margin-left: 15px"
+                               name="filter_organ_no" placeholder="按机构号搜索" value="" autocomplete="off">
+                        <input type="text" class="form-control input-sm m-b-xs col-sm-2"
+                               name="filter_table_name" placeholder="按表名搜索" value="" autocomplete="off"
+                        style="margin-left: 40px">
+                    </div>
+                    <div class="hr-line-dashed"></div>
+                    <div class="table-responsive">
+                        <table class="table table-striped table-bordered table-hover dataTables-example" >
+                            <thead>
+                            <tr>
+                                <th>序号</th>
+                                <th>机构号</th>
+                                <th>机构名称</th>
+                                <th>渠道号</th>
+                                <th>表名</th>
+{#                                <th>村镇银行机构号</th>#}
+                                <th>创建日期</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+{#                            {% for relation in relations %}#}
+{#                                <tr>#}
+{#                                    <td>{{ relation.user_id }}</td>#}
+{#                                    <td>{{ relation.org_name }}</td>#}
+{#                                    <td>{{ relation.ds_id }}</td>#}
+{#                                    <td>{{ relation.table_name }}</td>#}
+{#                                    <td>{{ relation.c_user_id }}</td>#}
+{#                                    <td>{{ relation.create_date }}</td>#}
+{#                                </tr>#}
+{#                            {% endfor %}#}
+                            </tbody>
+                            <tfoot>
+                            <tr>
+                                <th>序号</th>
+                                <th>机构号</th>
+                                <th>机构名称</th>
+                                <th>渠道号</th>
+                                <th>表名</th>
+{#                                <th>村镇银行机构号</th>#}
+                                <th>创建日期</th>
+                            </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <script src="{% static 'js/plugins/dataTables/datatables.min.js' %}"></script>
+
+    <script src="{% static 'js/inspinia.js' %}"></script>
+    <script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+{% endblock %}
+
+{% block custom_page_js %}
+    <script>
+
+        $.fn.dataTable.Buttons.defaults.dom.button.className = 'btn btn-white btn-sm';
+        function createDataTable(org_no='', table_name='') {
+            $('.dataTables-example').DataTable({
+                pageLength: 25,
+                responsive: true,
+                dom: '<"html5buttons"B>lTfgitp',
+                destroy: true,
+                {#autoWidth: true,#}
+                language: {
+                    lengthMenu: "选择每页 _MENU_ 展示 ",
+                    zeroRecords: "未找到匹配结果",
+                    info: "当前显示第 _PAGE_ 页结果，共 _PAGES_ 页",
+                    infoEmpty: "没有数据",
+                    infoFiltered: "(获取 _MAX_ 项结果)",
+                    paginate: {
+                        first: "首页",
+                        previous: "上一页",
+                        next: "下一页",
+                        last: "末页"
+                }
+            },
+                columns: [
+                    {
+                        data: null,
+                        'render': function (data, type, full, meta) {
+                            return meta.row + 1 + meta.settings._iDisplayStart;
+                        }
+                    },
+                    { data: 'user_id' },
+                    { data: 'org_name' },
+                    { data: 'ds_id' },
+                    { data: 'table_name' },
+                    {#{ data: 'c_user_id' },#}
+                    { data: 'create_date' },
+                ],
+                buttons: [
+                    {
+                        extend: 'copy'
+                    },
+                    {
+                        extend: 'csv'
+                    },
+                    {
+                        extend: 'excel', title: 'ExampleFile'
+                    },
+                    {
+                        extend: 'pdf', title: 'ExampleFile'
+                    },
+
+                    {
+                        extend: 'print',
+                        customize: function (win) {
+                            $(win.document.body).addClass('white-bg');
+                            $(win.document.body).css('font-size', '10px');
+                            $(win.document.body).find('table').addClass('compact').css('font-size', 'inherit');
+                        }
+                    },
+                ],
+                ajax: {
+                    url: '{% url 'sjxf:filter_data_relation' %}',
+                    data: {
+                        'org_no': org_no,
+                        'table_name': table_name,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    type: 'post',
+                    dataSrc: '',
+                }
+            });
+        }
+        $(document).ready(function(){
+            let org_no = $("input[name='filter_organ_no']").val();
+            let table_name = $("input[name='filter_table_name']").val();
+            createDataTable(org_no, table_name)
+            $(':input').bind("input propertychange", function(event) {
+                org_no = $("input[name='filter_organ_no']").val();
+                table_name = $("input[name='filter_table_name']").val();
+                if ($(this).attr('name') === 'filter_organ_no') table_name = ''
+                else org_no = '';
+                createDataTable(org_no, table_name)
+            });
+        });
+
+    </script>
+{% endblock %}

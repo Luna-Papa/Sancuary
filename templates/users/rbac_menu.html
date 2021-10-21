@@ -1,0 +1,23 @@
+{% for k,item in menu_result.items %}
+    <li class="{% if item.active %}active{% endif %}">
+        <a href="#">
+            <i class="fa {{ item.icon }}"></i>
+            <span class="nav-label">{{ item.menu_title }}</span>
+            <span class="fa arrow"></span>
+        </a>
+
+        <ul class="nav nav-second-level collapse">
+            {% for v in item.children  %}
+                {% if v.active %}
+                    <li class="active">
+                        <a href="{{ v.url }}">{{ v.title }}</a>
+                    </li>
+                {% else %}
+                    <li>
+                        <a href="{{ v.url }}">{{ v.title }}</a>
+                    </li>
+                {% endif %}
+            {% endfor %}
+        </ul>
+    </li>
+{% endfor %}

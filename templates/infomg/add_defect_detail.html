@@ -1,0 +1,239 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+添加待处理缺陷明细
+{% endblock %}
+
+{% block custom_css %}
+    <link href="{% static 'css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/iCheck/custom.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/datapicker/datepicker3.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/awesome-bootstrap-checkbox/awesome-bootstrap-checkbox.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/select2/select2.min.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/select2/select2-bootstrap4.min.css' %}" rel="stylesheet">
+{% endblock %}
+
+<!-- 主页内容头部 -->
+{% block content-header %}
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-12">
+            <h2>对手信息查询</h2>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">首页</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <strong>数据查询</strong>
+                </li>
+            </ol>
+        </div>
+    </div>
+{% endblock %}
+
+<!-- 主页正文 -->
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeIn">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox">
+                    <div class="ibox-title">
+                        <h5>增加待处理缺陷</h5>
+                    </div>
+                    <div class="ibox-content">
+                        <h3></h3>
+                        <p></p>
+                        <form class="m-t-md" enctype="multipart/form-data"
+                            action="{% url 'InfoMG:save_defect_detail' %}" method="post" onsubmit="checkDisable()">
+                            {% csrf_token %}
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">缺陷期数</label>
+                                <div class="col-sm-10" aria-required="true">
+                                    <select class="select2_1 form-control" name="periods"
+                                            {% if not periods %}
+                                                disabled
+                                            {% endif %} >
+                                        <option></option>
+                                        {% if not periods %}
+                                            <option value={{ defects.periods }} selected> {{ defects.periods }}</option>
+                                        {% else %}
+                                            {% for period in periods %}
+                                                <option value='{{ period.periods }}'> {{ period.periods }}</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group row">
+                                <label class="col-sm-2 col-form-label">缺陷软件版本</label>
+                                <div class="col-sm-10" aria-required="true">
+                                    <select class="select2_2 form-control" name="defect_model"
+                                            {% if not periods %}
+                                                disabled
+                                            {% endif %} >
+                                        <option></option>
+                                        {% if not periods %}
+                                            <option value='{{ defects.model }}' selected> {{ defects.model }}</option>
+                                        {% else %}
+                                            {% for defect in defects %}
+                                                <option value='{{ defect.model }}'> {{ defect.model }}</option>
+                                            {% endfor %}
+                                        {% endif %}
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group row group_input">
+                                <label class="col-sm-2 col-form-label">待处理缺陷明细录入
+                                    <div class="col-sm-2 form-group row">
+                                        <a class="col-sm-1 col-form-label" onclick="addGroupInput()">
+                                            <i class="fa fa-plus"></i>
+                                        </a>
+                                    </div>
+                                </label>
+                                <div class="col-sm-10">
+                                    <label class="col-form-label">请输入系统名</label>
+                                    <input type="text" class="form-control" placeholder=""
+                                           aria-required="true" name="system">
+                                    <label class="col-form-label">请输入解决方案</label>
+                                    <input type="text" class="form-control" placeholder=""
+                                           aria-required="true" name="solution">
+                                    <label class="col-form-label">拟解决日期</label>
+                                    <div class="input-group date">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <input type="text" class="form-control" value=""
+                                               name="solve_date" required>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group row col-sm-12" >
+                                <button class="btn btn-primary btn-lg col-sm-2 offset-4" type="submit">提交</button>
+                            </div>
+                            <input style="display: none" name="table_counts" value=1>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{% static 'js/inspinia.js' %}"></script>
+    <script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+    <script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <!-- iCheck -->
+    <script src="{% static 'js/plugins/iCheck/icheck.min.js' %}"></script>
+    <!-- Data picker -->
+    <script src="{% static 'js/plugins/datapicker/bootstrap-datepicker.js' %}"></script>
+    <!-- iCheck -->
+    <script src="{% static 'js/plugins/iCheck/icheck.min.js' %}"></script>
+    <!-- Select2 -->
+    <script src="{% static 'js/plugins/select2/select2.full.min.js' %}"></script>
+
+{% endblock %}
+
+{% block custom_page_js %}
+
+    <script>
+        $(document).ready(function(){
+            $('.input-group.date').datepicker({
+                todayBtn: "linked",
+                keyboardNavigation: false,
+                forceParse: false,
+                {#calendarWeeks: true,#}
+                autoclose: true,
+                format: "yyyy-mm-dd",
+                todayHighlight: true,
+            });
+
+            $(".select2_1").select2({
+                theme: 'bootstrap4',
+            });
+            $(".select2_2").select2({
+                theme: 'bootstrap4',
+            });
+        });
+        <!-- 动态增加表单录入组 -->
+        function addGroupInput() {
+            const last_input = $('.group_input:last')
+            last_input.after(`
+                <div class="hr-line-dashed dash_group"></div>
+                <div class="form-group row group_input">
+                    <label class="col-sm-2 col-form-label">待处理缺陷明细录入
+                        <div class="form-group row">
+                            <a class="col-sm-1 col-form-label" onclick="removeGroupInput()">
+                                <i class="fa fa-minus"></i>
+                            </a>
+                            <a class="col-sm-1 col-form-label" onclick="addGroupInput()">
+                                <i class="fa fa-plus"></i>
+                            </a>
+                        </div>
+                        </label>
+                            <div class="col-sm-10">
+                                <label class="col-form-label">请输入系统名</label>
+                                <input type="text" class="form-control" placeholder=""
+                                       aria-required="true" name="system" required>
+                                <label class="col-form-label">请输入解决方案</label>
+                                <input type="text" class="form-control" placeholder=""
+                                       aria-required="true" name="solution" required>
+                                <label class="col-form-label">拟解决日期</label>
+                                <div class="input-group date">
+                                    <span class="input-group-addon">
+                                        <i class="fa fa-calendar"></i>
+                                    </span>
+                                    <input type="text" class="form-control" value=""
+                                           name="solve_date" required>
+                                </div>
+                            </div>
+                        </div>
+                    `)
+        };
+        <!-- 动态减少表单录入组 -->
+        function  removeGroupInput() {
+            const group_input_num = $('.group_input').length
+            const last_input = $('.group_input:last')
+            if (group_input_num > 1) {
+                last_input.remove();
+                $('.dash_group:last').remove()
+            }
+        };
+        <!-- 根据缺陷期数下拉框动态更新下拉缺陷列表 -->
+        $("select[name='periods']").change(function (){
+            const periods = $(this).val();
+            $.ajax({
+                url: '{% url 'InfoMG:ajax_get_defect' %}',
+                method: 'post',
+                data: {
+                    'periods': periods,
+                    csrfmiddlewaretoken: '{{ csrf_token }}',
+                },
+                success: function (data) {
+                    const defect_model = $("select[name='defect_model']")
+                    defect_model.empty();
+                    defect_model.append(`<option></option>`)
+                    $.each(data, function (index, item){
+                        defect_model.append(
+                            `<option value='${item.model+1}'>'${item.model+1}'</option>`
+                        )
+                    })
+                }
+            })
+        });
+        <!-- 表单提交解除下拉框disable状态 -->
+        function checkDisable() {
+            $("select[disabled]").each(function() {
+                if (parseInt($(this).val()) !== -1) {
+                    $(this).attr("disabled", false);
+                }
+            });
+            return true;
+        }
+    </script>
+
+{% endblock %}

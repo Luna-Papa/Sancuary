@@ -1,0 +1,105 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+基础软硬件缺陷导入
+{% endblock %}
+
+{% block custom_css %}
+    <link href="{% static 'css/plugins/datapicker/datepicker3.css' %}" rel="stylesheet">
+{% endblock %}
+
+<!-- 主页内容头部 -->
+{% block content-header %}
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>数据提取信息登记</h2>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">首页</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    <strong>信息登记</strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+        </div>
+    </div>
+{% endblock %}
+<!-- 主页正文 -->
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeIn">
+        <div class="row">
+            <div class="col-lg-12">
+                <div class="ibox">
+                    <div class="ibox-content">
+                        <h3></h3>
+                        <p></p>
+                        <form class="m-t-md" enctype="multipart/form-data"
+                              action="{% url 'InfoMG:defect_imp' %}" method="post">
+                            {% csrf_token %}
+                            <div class="col-sm-5 row toggle-show" >
+                                    <label class="font-norma">录入期数</label>
+                                    <div class="input-group date">
+                                        <span class="input-group-addon">
+                                            <i class="fa fa-calendar"></i>
+                                        </span>
+                                        <input type="text" class="form-control" value=""
+                                               name="periods" required>
+                                    </div>
+                                </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group row col-sm-12">
+                                <div class="custom-file col-sm-5">
+                                    <input id="logo" type="file" class="custom-file-input" name="file" required>
+                                    <label for="logo" class="custom-file-label">选择文件...</label>
+                                </div>
+                                <div class="col-sm-1"></div>
+                            </div>
+                            <div class="hr-line-dashed"></div>
+                            <div class="form-group row">
+                                <div class="col-sm-12">
+                                    <button class="btn btn-primary btn-lg col-sm-2 offset-sm-1" type="submit">提交</button>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{% static 'js/inspinia.js' %}"></script>
+    <script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+    <script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <!-- Data picker -->
+    <script src="{% static 'js/plugins/datapicker/bootstrap-datepicker.js' %}"></script>
+
+{% endblock %}
+
+{% block custom_page_js %}
+
+    <script>
+
+        $(document).ready(function(){
+            $('.input-group.date').datepicker({
+                minViewMode: 1,
+                keyboardNavigation: false,
+                forceParse: false,
+                autoclose: true,
+                todayHighlight: true,
+                format: "yyyy-mm",
+            });
+        });
+        <!-- 上传文件 -->
+        $('.custom-file-input').on('change', function() {
+            let fileName = $(this).val().split('\\').pop();
+            $(this).next('.custom-file-label').addClass("selected").html(fileName);
+        });
+    </script>
+
+{% endblock %}

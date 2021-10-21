@@ -1,0 +1,236 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}
+基础软硬件缺陷清单
+{% endblock %}
+
+{% block custom_css %}
+<link href="{% static 'css/plugins/footable/footable.core.css' %}" rel="stylesheet">
+{% endblock %}
+
+{% block content-header %}
+    <div class="row wrapper border-bottom white-bg page-heading">
+        <div class="col-lg-10">
+            <h2>软硬件缺陷清单</h2>
+            <ol class="breadcrumb">
+                <li class="breadcrumb-item">
+                    <a href="#">首页</a>
+                </li>
+                <li class="breadcrumb-item active">
+                    缺陷清单 -
+                    <strong>
+                        {% if periods %}
+                            {{ periods|slice:":4"}}年{{ periods|slice:"5:"}}期
+                        {% else %}
+                            全部
+                        {% endif %}
+
+                    </strong>
+                </li>
+            </ol>
+        </div>
+        <div class="col-lg-2">
+        </div>
+    </div>
+{% endblock %}
+
+{% block content %}
+    <div class="wrapper wrapper-content animated fadeIn">
+        <div class="ibox-content">
+            <input type="text" class="form-control form-control-sm m-b-xs" id="filter"
+                                   placeholder="搜索关键字">
+            <table class="footable table table-stripped toggle-arrow-tiny" data-page-size="10" data-filter=#filter>
+                <thead>
+                <tr>
+                    <th data-type="numeric" data-toggle="true">序号</th>
+                    <th>缺陷期数</th>
+                    <th>产品类型</th>
+                    <th>设备型号/软件版本</th>
+                    <th data-hide="all">生产厂商</th>
+                    <th data-hide="all">缺陷原因</th>
+                    <th>缺陷影响</th>
+                    <th data-hide="all">解决方案</th>
+                    <th data-hide="all">补丁版本</th>
+                    <th data-hide="all">解决状态</th>
+                    <th data-hide="all">发现时间</th>
+                    <th>行内解决方案</th>
+                    <th>行内解决状态</th>
+                    <th>处理进度</th>
+                </tr>
+                </thead>
+                <tbody>
+                {% for defect in all_defects %}
+                    <tr>
+                        <td>{{ forloop.counter }}</td>
+                        <td>{{ defect.periods }}</td>
+                        <td>{{ defect.category }}</td>
+                        <td>
+                            <a href="{% url 'InfoMG:add_defect_detail' defect.id %}" title="添加待处理明细">
+                                {{ defect.model }}
+                            </a>
+                        </td>
+                        <td>{{ defect.manufacturer }}</td>
+                        <td>{{ defect.reason }}</td>
+                        <td>{{ defect.defect }}</td>
+                        <td>{{ defect.solution }}</td>
+                        <td>{{ defect.fix_pack }}</td>
+                        <td>{{ defect.status }}</td>
+                        <td>{{ defect.find_date }}</td>
+                        <td>
+                            <a title="添加解决方案"
+                               data-toggle="modal"
+                               href="#v_solution-form"
+                               data-whatever="{{ defect.id }}">
+                                {% if defect.v_solution %}
+                                    {{ defect.v_solution }}
+                                {% else %}
+                                    待录入
+                                {% endif %}
+                            </a>
+                        </td>
+                        <td>
+                            {% if defect.v_flag == '0' %}
+                                待解决
+                            {% elif defect.v_flag == '1' %}
+                                已解决
+                            {% elif defect.v_flag == '2' %}
+                                无需处理
+                            {% else %}
+                                {{ defect.v_flag }}
+                            {% endif %}
+                        </td>
+                        <td>
+                            {% if defect.all_details_count == 0 %}
+                                无待处理明细
+                            {% else %}
+                                {{ defect.solved_details_count }}/{{ defect.all_details_count }}
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+                <tfoot>
+                <tr>
+                    <td colspan="5">
+                        <ul class="pagination float-right"></ul>
+                    </td>
+                </tr>
+                </tfoot>
+            </table>
+        </div>
+    </div>
+
+    <!-- 缺陷行内解决方案弹出框 -->
+    <div id="v_solution-form" class="modal fade" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-body">
+                    <div class="row">
+                        <div class="col-sm-12">
+                            <h3 class="m-t-none m-b">添加行内解决方案</h3>
+                            <p></p>
+                            <form role="form" method="post" action="">
+                                {% csrf_token %}
+                                <div class="form-group row">
+                                    <textarea class="form-control message-input"
+                                              placeholder="最多可以输入200个字符"
+                                              maxlength="200"
+                                              name="v_solution"></textarea>
+                                </div>
+                                <div class="model_defect_id" style="display: none"></div>
+                                <div>
+                                    <button class="btn btn-lg btn-primary m-t-n-xs"
+                                            type="button" name="confirm"
+                                            style="margin-left: 280px">
+                                        <strong>无需处理</strong>
+                                    </button>
+                                    <button class="btn btn-lg btn-info float-right m-t-n-xs"
+                                            type="button" name="add_v_solution">
+                                        <strong>确认</strong>
+                                    </button>
+                                </div>
+                                <p style="color: red" id="add_v_solution_msg"></p>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block custom_js %}
+    <script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <script src="{% static 'js/plugins/footable/footable.all.min.js' %}"></script>
+
+    <script src="{% static 'js/inspinia.js' %}"></script>
+    <script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+{% endblock %}
+
+{% block custom_page_js %}
+    <script>
+        $(document).ready(function() {
+            $('.footable').footable();
+        });
+
+        let source = ''
+        $('#v_solution-form').on('show.bs.modal', function (event) {
+            source = $(event.relatedTarget);
+            const defect_id = source.data('whatever')
+            $(".model_defect_id").text(defect_id)
+        })
+
+        $("button[name='add_v_solution']").bind("click", function () {
+            const tds = source.parent().parent().find('td')
+            const v_solution = $("textarea[name='v_solution']").val()
+            const defect_id = $(".model_defect_id").text()
+            if (v_solution === '') alert("请输入解决方案")
+            else {
+                $.ajax({
+                    url: '{% url 'InfoMG:add_v_solution' %}',
+                    type: 'post',
+                    data: {
+                        defect_id: defect_id,
+                        v_solution: v_solution,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function (data) {
+                        if (data === 'success') {
+                            $("#v_solution-form").modal("hide");
+                            window.location.reload()
+                        }
+                        else alert('添加失败，请联系系统管理员！')
+                    }
+                })
+            }
+        })
+
+        $("button[name='confirm']").bind("click", function () {
+            const tds = source.parent().parent().find('td')
+            const v_solution = $("textarea[name='v_solution']").val()
+            const defect_id = $(".model_defect_id").text()
+            if (v_solution === '') alert("请输入解决方案")
+            else {
+                $.ajax({
+                    url: '{% url 'InfoMG:update_defect_v_flag' %}',
+                    type: 'post',
+                    data: {
+                        defect_id: defect_id,
+                        v_solution: v_solution,
+                        csrfmiddlewaretoken: '{{ csrf_token }}',
+                    },
+                    success: function (data) {
+                        if (data === 'success') {
+                            $("#v_solution-form").modal("hide");
+                            window.location.reload()
+                        }
+                        else alert('添加失败，请联系系统管理员！')
+                    }
+                })
+            }
+        })
+    </script>
+{% endblock %}
+

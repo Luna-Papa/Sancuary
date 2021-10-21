@@ -1,0 +1,407 @@
+<!DOCTYPE html>
+{% load static %}
+{% load custom_tag %}
+<html lang="en">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
+    <title>{% block title %}
+       运维驾驶舱 -
+    {% endblock %}</title>
+
+    <link href="{% static 'css/bootstrap.min.css' %}" rel="stylesheet">
+    <link href="{% static 'font-awesome/css/font-awesome.css' %}" rel="stylesheet">
+    <!-- Toastr style -->
+    <link href="{% static 'css/plugins/toastr/toastr.min.css' %}" rel="stylesheet">
+    <!-- Gritter -->
+    <link href="{% static 'js/plugins/gritter/jquery.gritter.css' %}" rel="stylesheet">
+    <link href="{% static 'css/plugins/sweetalert/sweetalert.css' %}" rel="stylesheet">
+
+    {% block custom_css %}
+    {% endblock %}
+
+    <link href="{% static 'css/plugins/textSpinners/spinners.css' %}" rel="stylesheet">
+    <link href="{% static 'css/animate.css' %}" rel="stylesheet">
+    <link href="{% static 'css/style.css' %}" rel="stylesheet">
+</head>
+
+<body>
+    <!-- 侧边栏 -->
+    <div id="wrapper">
+        <nav class="navbar-default navbar-static-side" role="navigation">
+            <div class="sidebar-collapse">
+                <ul class="nav metismenu" id="side-menu">
+                    <li class="nav-header">
+                        <div class="dropdown profile-element">
+                            <img alt="image" class="rounded-circle" src="/static/images/boy.png"
+                                 style="width: 48px; height: 48px"/>
+                            <a data-toggle="dropdown" class="dropdown-toggle" href="#">
+                                <span class="block m-t-xs font-bold">{{ request.user.real_name }}</span>
+{#                                <span class="text-muted text-xs block">{{ request.user.department }}</span>#}
+                                <span class="text-muted text-xs block">{{ request.user.position }}
+                                    <b class="caret"></b>
+                                </span>
+                            </a>
+                            <ul class="dropdown-menu animated fadeInRight m-t-xs">
+                                <li><a class="dropdown-item" data-toggle="modal" href="#userinfo-form">个人信息</a></li>
+                                <li><a class="dropdown-item" data-toggle="modal" href="#chg-pwd-form">修改密码</a></li>
+                                <li class="dropdown-divider"></li>
+                                <li><a class="dropdown-item" href="{% url 'users:logout' %}">退出登录</a></li>
+                            </ul>
+                        </div>
+                        <div class="logo-element">
+                            +HP+
+                        </div>
+                    </li>
+                    <!-- 侧边动态菜单展示 -->
+                    {% rbac_menu request %}
+                </ul>
+            </div>
+        </nav>
+
+        <div id="page-wrapper" class="gray-bg dashbard-1">
+            <div class="row border-bottom">
+                <nav class="navbar navbar-static-top" role="navigation" style="margin-bottom: 0">
+                    <div class="navbar-header">
+                        <a class="navbar-minimalize minimalize-styl-2 btn btn-primary " href="#">
+                            <i class="fa fa-bars"></i>
+                        </a>
+                        <form role="search" class="navbar-form-custom" action="#">
+                            {% csrf_token %}
+                            <div class="form-group">
+                                <input type="text" placeholder="搜一下试试" class="form-control"
+                                       name="top-search" id="top-search">
+                            </div>
+                        </form>
+                    </div>
+                    <ul class="nav navbar-top-links navbar-right">
+                        <li style="padding: 20px">
+                            <span class="m-r-sm text-muted welcome-message">希望您有个好心情！</span>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-envelope"></i>
+                                <span class="label label-warning">0</span>
+                            </a>
+                        </li>
+                        <li class="dropdown">
+                            <a class="dropdown-toggle count-info" data-toggle="dropdown" href="#">
+                                <i class="fa fa-bell"></i>
+                                <span class="label label-primary">0</span>
+                            </a>
+                        </li>
+
+                        <li>
+                            <a href="{% url 'users:logout' %}">
+                                <i class="fa fa-sign-out"></i> 登出
+                            </a>
+                        </li>
+
+                        <li>
+                            <a class="right-sidebar-toggle">
+                                <i class="fa fa-tasks"></i>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+            </div>
+
+            <!-- 主页内容头部 -->
+            {% block content-header %}
+            {% endblock %}
+            <!-- 主页正文 -->
+            {% block content %}
+            {% endblock %}
+            <!-- 个人信息弹出框 -->
+            <div id="userinfo-form" class="modal fade" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h3 class="m-t-none m-b">个人信息</h3>
+                                    <p></p>
+                                    <div class="text-center">
+                                        <h3>
+                                            <strong>{{ request.user.real_name }}</strong>
+                                        </h3>
+                                        <p><strong>职务：</strong>{{ request.user.position }}</p>
+                                        <p><strong>部门：</strong>{{ request.user.department }}</p>
+                                        <p><strong>联系方式：</strong>{{ request.user.phone }}</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 密码修改弹出框 -->
+            <div id="chg-pwd-form" class="modal fade" aria-hidden="true">
+                <div class="modal-dialog">
+                    <div class="modal-content">
+                        <div class="modal-body">
+                            <div class="row">
+                                <div class="col-sm-12">
+                                    <h3 class="m-t-none m-b">密码修改</h3>
+                                    <p></p>
+                                    <form role="form" method="post" action="{% url 'users:chg_pwd' %}">
+                                        {% csrf_token %}
+                                        <div class="form-group">
+                                            <label>原密码</label>
+                                            <input type="password" class="form-control" name="password" required>
+                                        </div>
+                                        <div id="pwd-container1" class="form-group">
+                                            <div class="form-group" >
+                                                <label>新密码</label>
+                                                <input type="password" class="form-control" name="password1"
+                                                    id="password1" value="Passwo" required>
+                                            </div>
+                                            <div class="form-group">
+                                                <div class="pwstrength_viewport_progress"></div>
+                                            </div>
+                                        </div>
+
+                                        <div class="form-group">
+                                            <label>确认新密码</label>
+                                            <input type="password" class="form-control" name="password2" required>
+                                        </div>
+                                        <div>
+                                            <button class="btn btn-lg btn-primary float-right m-t-n-xs"
+                                                    type="submit" name="chg_pwd" >
+                                                <strong>确认</strong>
+                                            </button>
+                                        </div>
+                                        <p style="color: red" id="chg_pwd_msg"></p>
+                                    </form>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            <!-- 页脚-->
+            <div class="footer">
+{#                <div class="float-right">#}
+{#                    10GB of <strong>250GB</strong> Free.#}
+{#                </div>#}
+                <div>
+                    <strong>版权所有&nbsp</strong>&nbsp&nbsp安徽农金&nbsp&nbsp&copy; 2021 - 2022
+                </div>
+            </div>
+        </div>
+
+        <!-- 聊天框 -->
+        <div class="small-chat-box fadeInRight animated">
+            <div class="heading" draggable="true">
+                <small class="chat-date float-right">
+                    2020.2.11
+                </small>
+                聊天
+            </div>
+            <div class="content">
+                <div class="left">
+                    <div class="author-name">
+                        张三
+                        <small class="chat-date">
+                        上午 11:20
+                        </small>
+                    </div>
+                    <div class="chat-message active">
+                        下班了，去吃饭。
+                    </div>
+                </div>
+                <div class="right">
+                    <div class="author-name">
+                        李四
+                        <small class="chat-date">
+                        上午 11:24
+                        </small>
+                    </div>
+                    <div class="chat-message">
+                        好的，这就走。
+                    </div>
+                </div>
+            </div>
+            <div class="form-chat">
+                <div class="input-group input-group-sm">
+                    <input type="text" class="form-control">
+                    <span class="input-group-btn">
+                        <button class="btn btn-primary" type="button">发送</button>
+                    </span>
+                </div>
+            </div>
+        </div>
+        <div id="small-chat" style="display: none">
+            <span class="badge badge-warning float-right">0</span>
+            <a class="open-small-chat" href="">
+                <i class="fa fa-comments"></i>
+            </a>
+        </div>
+    </div>
+    <!-- 弹出通知 -->
+{#    <div class="toast toast toast-bootstrap hide" role="alert" aria-live="assertive"#}
+{#         aria-atomic="true" style="position: absolute; top:20px; right:20px">#}
+{#        <div class="toast-header">#}
+{#            <i class="fa fa-square text-navy"> </i>#}
+{#            <strong class="mr-auto m-l-sm">通知</strong>#}
+{#            <small></small>#}
+{#            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">#}
+{#                <span aria-hidden="true">&times;</span>#}
+{#            </button>#}
+{#        </div>#}
+{#        <div class="toast-body">#}
+{#            {% block alert %}#}
+{#                欢迎来到 <strong>运维驾驶舱</strong> ---#}
+{#            {% endblock %}#}
+{#        </div>#}
+{#    </div>#}
+    <div class="toast toast toast-bootstrap hide" role="alert" aria-live="assertive" aria-atomic="true" style="position: absolute; top:20px; right:20px">
+        <div class="toast-header">
+            <i class="fa fa-square text-navy"></i>
+            <strong class="mr-auto m-l-sm">通知</strong>
+            <small></small>
+            <button type="button" class="ml-2 mb-1 close" data-dismiss="toast" aria-label="Close">
+                <span aria-hidden="true">&times;</span>
+            </button>
+        </div>
+        <div class="toast-body">
+           欢迎来到运维驾驶舱
+        </div>
+    </div>
+
+    <!-- Mainly scripts -->
+    <script src="{% static 'js/jquery-3.1.1.min.js' %}"></script>
+    <script src="{% static 'js/popper.min.js' %}"></script>
+    <script src="{% static 'js/bootstrap.js' %}"></script>
+    <script src="{% static 'js/plugins/metisMenu/jquery.metisMenu.js' %}"></script>
+    <script src="{% static 'js/plugins/slimscroll/jquery.slimscroll.min.js' %}"></script>
+    <!-- Password meter -->
+    <script src="{% static 'js/plugins/pwstrength/i18next.js' %}"></script>
+    <script src="{% static 'js/plugins/pwstrength/pwstrength.js' %}"></script>
+    <script src="{% static 'js/plugins/pwstrength/zxcvbn.js' %}"></script>
+     <!-- Toastr -->
+    <script src="{% static 'js/plugins/toastr/toastr.min.js' %}"></script>
+    <script src="{% static 'js/plugins/sweetalert/sweetalert.min.js' %}"></script>
+    {% block custom_js %}
+        <!-- lead into require js -->
+    {% endblock %}
+
+    <!-- Custom and plugin javascript -->
+    <script src="{% static 'js/inspinia.js' %}"></script>
+    <script src="{% static 'js/plugins/pace/pace.min.js' %}"></script>
+
+    {% block custom_page_js %}
+        <!-- add js in html -->
+    {% endblock %}
+
+    <script>
+        $(document).ready(function (){
+            {#"use strict";#}
+            <!-- 新密码复杂度校验插件设置 -->
+            i18next.init({
+                lng: 'es',
+                resources: {
+                    es: {
+                        translation: {
+                            "wordMinLength": "您的密码太短",
+                            "wordMaxLength": "您的密码太长",
+                            "wordInvalidChar": "您的密码包含无效字符",
+                            "wordNotEmail": "不要使用电子邮件作為密码",
+                            "wordSimilarToUsername": "您的密码不能包含您的用戶名",
+                            "wordTwoCharacterClasses": "使用不同的组合类型 例如: 大小写混合",
+                            "wordRepetitions": "太多的重复。例如:1111",
+                            "wordSequences": "你的密码包含连续英文/数字 例如:123 or abc",
+                            "errorList": "错误：",
+                            "veryWeak": "非常弱",
+                            "weak": "弱",
+                            "normal": "普通",
+                            "medium": "中等",
+                            "strong": "強",
+                            "veryStrong": "非常強"
+                        }
+                    }
+                }
+            }, function () {
+                const options1 = {};
+                options1.ui = {
+                    container: "#pwd-container1",
+                    showVerdictsInsideProgressBar: true,
+                    viewports: {
+                        progress: ".pwstrength_viewport_progress"
+                    },
+                    showErrors: true,
+                    showPopover: true,
+                };
+                options1.common = {
+                    debug: false,
+                };
+                options1.rules = {
+                    activated: {
+                        wordTwoCharacterClasses: true,
+                        wordRepetitions: true,
+                        wordSequences: true,
+                        wordMinLength: 6,
+                        wordInvalidChar: true,
+                    }
+                };
+                $('#password1').pwstrength(options1);
+            });
+
+            $("button[name='chg_pwd']").attr("disabled", true);
+            const password = $("input[name='password']");
+            let chk_old_pwd = false;
+            let chk_new_pwd = false;
+            <!-- 校验原密码是否正确 -->
+            password.blur(function (){
+                const old_pwd = password.val()
+                if (old_pwd !== '') {
+                    $.ajax({
+                        url: '{% url 'users:chk_pwd' %}',
+                        type: 'post',
+                        data: {
+                            csrfmiddlewaretoken: '{{ csrf_token }}',
+                            password: old_pwd,
+                        },
+                        success: function (data) {
+                            if (data !== 'ok') {
+                                $('#chg_pwd_msg').text(data);
+                                chk_old_pwd = false
+                                $("button[name='chg_pwd']").attr("disabled", true);
+                            }
+                            else {
+                                $('#chg_pwd_msg').text('');
+                                chk_old_pwd = true
+                                if (chk_new_pwd) $("button[name='chg_pwd']").attr("disabled", false);
+                                else $("button[name='chg_pwd']").attr("disabled", true);
+                            }
+                        }
+                    })
+                }
+            });
+            const password1 = $("input[name='password1']")
+            const password2 = $("input[name='password2']")
+            password2.bind('input propertychange', function() {
+                if (password1.val() === password2.val()) {
+                    $(this).css("border-color", "blue")
+                    password1.css("border-color", "blue")
+                    chk_new_pwd = true
+                    if (chk_old_pwd) $("button[name='chg_pwd']").attr("disabled", false);
+                    else $("button[name='chg_pwd']").attr("disabled", true);
+                }
+                else {
+                    $(this).css("border-color", "red");
+                    chk_new_pwd = false;
+                    $("button[name='chg_pwd']").attr("disabled", true)
+                }
+            })
+        })
+        $(window).bind("scroll", function () {
+            let toast = $('.toast');
+            toast.css("top", window.pageYOffset + 20);
+        });
+    </script>
+</body>
+</html>
